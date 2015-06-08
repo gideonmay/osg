@@ -8,6 +8,9 @@
 #include <osgDB/Registry>
 
 #include <iostream>
+#include <fstream>
+#include <string>
+
 #include <stdio.h>
 #include <string.h>
 
@@ -88,6 +91,8 @@ enum ReaderState {
     READ_FACES
 };
 
+using namespace std;
+
 class ReaderWriterOFF : public osgDB::ReaderWriter
 {
     public:
@@ -109,8 +114,7 @@ class ReaderWriterOFF : public osgDB::ReaderWriter
 
             OSG_INFO << "Reading file "<<fileName<<std::endl;
 
-            const int LINE_SIZE = 1024;
-            char line[LINE_SIZE];
+            std::string line;
 
             // unsigned int targetNumVertices = 10000;
 
@@ -136,22 +140,26 @@ class ReaderWriterOFF : public osgDB::ReaderWriter
             bool has_dim = false;
             bool dim = 3;
             
+            int  vertex_count, face_count, edge_count;
+            int  vertex_idx, face_idx, edge_idx;
+            vertex_idx = face_idx = edge_idx = 0;
+            
             ReaderState reader_state = READ_HEADER;
             osgDB::ifstream fin(fileName.c_str());
-            while (fin)
+            while (std::getline(fin, line)) {
             {
-                fin.getline(line,LINE_SIZE);
                 if (line[0]=='#')
                 {
                     // comment line
                     OSG_INFO <<"Comment: "<<line<<std::endl;
+                    continue;
                 }
-                if (strlen(line) == 0) continue;
+                if (line.size() == 0) continue;
                 
                 switch (reader_state) {
                     case READ_HEADER :
                     {
-                        char * cp = line;
+                        const char * cp = line.c_str();
                         if (strncmp(cp, "ST", 2) == 0) {
                             has_st = true;
                             cp += 2;
@@ -192,23 +200,56 @@ class ReaderWriterOFF : public osgDB::ReaderWriter
                     
                     case READ_COUNT:
                     {
-                        
+                        vertex_count = face_count = edge_count = 0;
+                        int matched = sscanf(line.c_str(),"%d%d%d",
+                                             &vertex_count, &face_count, &edge_count);
+                        if (!matched) {
+                            OSG_INFO << "Error in file : " << line << std::endl;
+                            return NULL;
+                        }
+                        reader_state = READ_VERTICES;
                     }
                     break;
                     
                     case READ_VERTICES:
                     {
+                        osg::Vec3 pos;
+                        int matched = sscanf(line.c_str(), "%f%f%f",
+                                             &pos.x(), &pos.y(), &pos.z());
                         
+                        if (!matched) {
+                            OSG_INFO << "Error in file : " << line << std::endl;
+                            return NULL;
+                        }
+                        vertices->push_back(pos);
+                        
+                        vertex_idx ++;
+                        if (vertex_idx == vertex_count) {
+                            reader_state = READ_FACES;
+                        }
                     }
                     break;
                         
                     case READ_FACES:
                     {
+                        osg::DrawElementsUInt* pDrawElements = new osg::DrawElementsUInt(GL_POLYGON);
+                        std::vector<unsigned int> all_integers;
                         
+                        std::istringstream is( line );
+                        std::copy(std::istream_iterator<unsigned int>(is),
+                                  std::istream_iterator<unsigned int>(),
+                                  std::back_inserter(all_integers));
+                        
+                        for (int i=1; i<all_integers.size(); i++) {
+                            unsigned int v = all_integers[i];
+                            pDrawElements->push_back(v);
+                        }
+                        geometry->addPrimitiveSet(pDrawElements);
                     }
                     break;
                         
                 }
+            }
                 
 #if 0                
                     if (!has_header) {
@@ -269,9 +310,9 @@ class ReaderWriterOFF : public osgDB::ReaderWriter
             geometry->setUseDisplayList(true);
             geometry->setUseVertexBufferObjects(true);
             geometry->setVertexArray(vertices);
-            if (has_normals) geometry->setNormalArray(normals, osg::Array::BIND_PER_VERTEX);
-            if (has_colors) geometry->setColorArray(colours, osg::Array::BIND_PER_VERTEX);
-            // geometry->addPrimitiveSet(new osg::DrawArrays(GL_POINTS,0,vertices->size()));
+//            if (has_normals) geometry->setNormalArray(normals, osg::Array::BIND_PER_VERTEX);
+//            if (has_colors) geometry->setColorArray(colours, osg::Array::BIND_PER_VERTEX);
+//            geometry->addPrimitiveSet(new osg::DrawArrays(GL_POINTS,0,vertices->size()));
 
             geode->addDrawable(geometry);
 
