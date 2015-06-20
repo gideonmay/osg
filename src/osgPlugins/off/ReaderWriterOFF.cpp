@@ -134,7 +134,7 @@ class ReaderWriterOFF : public osgDB::ReaderWriter
 
             bool has_header = false;
             bool has_normals = false;
-            bool has_colors = false;
+            bool has_colours = false;
             bool has_st = false;
             bool has_w = false;
             bool has_dim = false;
@@ -169,7 +169,7 @@ class ReaderWriterOFF : public osgDB::ReaderWriter
                             cp ++;
                         }
                         if (cp[0] == 'C') {
-                            has_colors = true;
+                            has_colours = true;
                             cp ++;
                         }
                         if (cp[0] == '4') {
@@ -203,7 +203,7 @@ class ReaderWriterOFF : public osgDB::ReaderWriter
                         vertex_count = face_count = edge_count = 0;
                         int matched = sscanf(line.c_str(),"%d%d%d",
                                              &vertex_count, &face_count, &edge_count);
-                        if (!matched) {
+                        if (matched != 3) {
                             OSG_INFO << "Error in file : " << line << std::endl;
                             return NULL;
                         }
@@ -213,15 +213,27 @@ class ReaderWriterOFF : public osgDB::ReaderWriter
                     
                     case READ_VERTICES:
                     {
-                        osg::Vec3 pos;
-                        int matched = sscanf(line.c_str(), "%f%f%f",
-                                             &pos.x(), &pos.y(), &pos.z());
+                        std::vector<float> all_floats;
+                        std::istringstream is( line );
+                        std::copy(std::istream_iterator<float>(is),
+                                  std::istream_iterator<float>(),
+                                  std::back_inserter(all_floats));
                         
-                        if (!matched) {
+                        if (all_floats.size() < 3) {
                             OSG_INFO << "Error in file : " << line << std::endl;
                             return NULL;
                         }
+                        osg::Vec3 pos(all_floats[0], all_floats[1], all_floats[2]);
                         vertices->push_back(pos);
+                        
+                        if (has_colours) {
+                            if (all_floats.size() < 6) {
+                                OSG_INFO << "Error in file : " << line << std::endl;
+                                return NULL;
+                            }
+                            osg::Vec3 colour(all_floats[3], all_floats[4], all_floats[5]);
+//                            colours->push_back(colour);
+                        }
                         
                         vertex_idx ++;
                         if (vertex_idx == vertex_count) {
@@ -310,9 +322,8 @@ class ReaderWriterOFF : public osgDB::ReaderWriter
             geometry->setUseDisplayList(true);
             geometry->setUseVertexBufferObjects(true);
             geometry->setVertexArray(vertices);
-//            if (has_normals) geometry->setNormalArray(normals, osg::Array::BIND_PER_VERTEX);
-//            if (has_colors) geometry->setColorArray(colours, osg::Array::BIND_PER_VERTEX);
-//            geometry->addPrimitiveSet(new osg::DrawArrays(GL_POINTS,0,vertices->size()));
+            if (has_colours) geometry->setColorArray(colours, osg::Array::BIND_PER_VERTEX);
+            if (has_normals) geometry->setNormalArray(normals, osg::Array::BIND_PER_VERTEX);
 
             geode->addDrawable(geometry);
 
