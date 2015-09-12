@@ -188,6 +188,10 @@ typedef char GLchar;
 #define GL_TRIANGLE_STRIP_ADJACENCY_EXT         0x000D
 #endif
 
+#ifndef GL_VERSION_3_0
+#define GL_MAX_VARYING_COMPONENTS                0x8B4B
+#endif
+
 #ifndef GL_VERSION_3_2
 #define GL_GEOMETRY_SHADER                       0x8DD9
 #define GL_GEOMETRY_VERTICES_OUT                 0x8916
@@ -196,7 +200,6 @@ typedef char GLchar;
 #define GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS      0x8C29
 #define GL_MAX_GEOMETRY_VARYING_COMPONENTS       0x8DDD
 #define GL_MAX_VERTEX_VARYING_COMPONENTS         0x8DDE
-#define GL_MAX_VARYING_COMPONENTS                0x8B4B
 #define GL_MAX_GEOMETRY_UNIFORM_COMPONENTS       0x8DDF
 #define GL_MAX_GEOMETRY_OUTPUT_VERTICES          0x8DE0
 #define GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS  0x8DE1
@@ -487,6 +490,15 @@ typedef char GLchar;
 #define GL_COMPUTE_SHADER_BIT             0x00000020
 #endif
 
+#ifndef GL_ARB_clip_control
+#define GL_LOWER_LEFT 0x8CA1
+#define GL_UPPER_LEFT 0x8CA2
+#define GL_CLIP_ORIGIN 0x935C
+#define GL_CLIP_DEPTH_MODE 0x935D
+#define GL_NEGATIVE_ONE_TO_ONE 0x935E
+#define GL_ZERO_TO_ONE 0x935F
+#endif
+
 #ifndef GL_ARB_depth_clamp
 #define GL_DEPTH_CLAMP                    0x864F
 #endif
@@ -586,6 +598,10 @@ typedef char GLchar;
 
 #ifndef GL_RASTERIZER_DISCARD
 #define GL_RASTERIZER_DISCARD           0x8C89
+#endif
+
+#ifndef GL_ALPHA_TEST
+    #define GL_ALPHA_TEST 0x0BC0
 #endif
 
 namespace osg

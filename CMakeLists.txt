@@ -52,9 +52,9 @@ endif()
 PROJECT(OpenSceneGraph)
 
 SET(OPENSCENEGRAPH_MAJOR_VERSION 3)
-SET(OPENSCENEGRAPH_MINOR_VERSION 3)
-SET(OPENSCENEGRAPH_PATCH_VERSION 9)
-SET(OPENSCENEGRAPH_SOVERSION 123)
+SET(OPENSCENEGRAPH_MINOR_VERSION 5)
+SET(OPENSCENEGRAPH_PATCH_VERSION 0)
+SET(OPENSCENEGRAPH_SOVERSION 140)
 
 # set to 0 when not a release candidate, non zero means that any generated
 # svn tags will be treated as release candidates of given number
@@ -402,7 +402,7 @@ OPTION(OSG_USE_REF_PTR_IMPLICIT_OUTPUT_CONVERSION "Set to ON to use the ref_ptr<
 
 
 # Map the OPENGL_PROFILE to OSG_GL*_AVAILABLE settings
-SET(OPENGL_PROFILE "GL2" CACHE STRING "OpenGL Profile to use, choose from GL2, GL3, GLES1, GLES2, GLES3")
+SET(OPENGL_PROFILE "GL2" CACHE STRING "OpenGL Profile to use, choose from GL1, GL2, GL3, GLES1, GLES2, GLES3")
 
 IF ((OPENGL_PROFILE STREQUAL "GL1") OR (OPENGL_PROFILE STREQUAL "GL2"))
     OPTION(OSG_GL1_AVAILABLE "Set to OFF to disable use of OpenGL 1.x functions library." ON )
@@ -574,11 +574,32 @@ ENDIF()
 
 
 ################################################################################
-# Set Config/OpenGL header file
+# Set Config header file
 
 SET(OPENSCENEGRAPH_CONFIG_HEADER "${PROJECT_BINARY_DIR}/include/osg/Config")
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/src/osg/Config.in"
                "${OPENSCENEGRAPH_CONFIG_HEADER}")
+
+
+################################################################################
+# Set OpenGL header file
+
+INCLUDE (CheckCXXSourceCompiles)
+#SET(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${OPENGL_INCLUDE_DIR})
+
+check_cxx_source_compiles(
+    "${OPENGL_HEADER1}
+    ${OPENGL_HEADER2}
+    int main() { GLint64 test; return 0; }"
+    GL_HEADER_HAS_GLINT64
+)
+
+check_cxx_source_compiles(
+    "${OPENGL_HEADER1}
+    ${OPENGL_HEADER2}
+    int main() { GLuint64 test; return 0; }"
+    GL_HEADER_HAS_GLUINT64
+)
 
 SET(OPENSCENEGRAPH_OPENGL_HEADER "${PROJECT_BINARY_DIR}/include/osg/GL")
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/src/osg/GL.in"
@@ -588,7 +609,7 @@ CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/src/osg/GL.in"
 
 
 ################################################################################
-# Set Vertsion header file
+# Set Version header file
 
 SET(OPENSCENEGRAPH_VERSION_HEADER "${PROJECT_BINARY_DIR}/include/osg/Version")
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/src/osg/Version.in"
@@ -661,7 +682,6 @@ ELSE()
     ENDIF()
     FIND_PACKAGE(ZeroConf)
 
-    FIND_PACKAGE(Boost) # used by LIBLAS
     FIND_PACKAGE(LIBLAS)
 
     IF (NOT(OSG_USE_LOCAL_LUA_SOURCE))
@@ -692,11 +712,11 @@ IF(OSG_USE_QT AND NOT ANDROID)
 
     IF  (DESIRED_QT_VERSION)
         IF  (DESIRED_QT_VERSION MATCHES 5)
-              FIND_PACKAGE(Qt5Widgets)
+            FIND_PACKAGE(Qt5Widgets)
         ELSEIF (DESIRED_QT_VERSION MATCHES 4)
-              FIND_PACKAGE(Qt4)
+            FIND_PACKAGE(Qt4)
         ELSE()
-              FIND_PACKAGE(Qt3)
+            FIND_PACKAGE(Qt3)
         ENDIF()
 
     ELSE()
@@ -728,6 +748,13 @@ IF(OSG_USE_QT AND NOT ANDROID)
     #If we have found Qt5, let's try to top off by getting the webkit as well
     IF ( Qt5Widgets_FOUND )
         FIND_PACKAGE(Qt5WebKitWidgets QUIET)
+
+        IF(COMMAND cmake_policy)
+            IF(${CMAKE_MAJOR_VERSION} GREATER 2)
+                # Qt5 qt5_use_modules usage was causing "Policy CMP0043 is not set: Ignore COMPILE_DEFINITIONS_<Config> properties." warnings
+                cmake_policy(SET CMP0043 NEW)
+            ENDIF()
+        ENDIF()
     ENDIF()
 
 ENDIF()

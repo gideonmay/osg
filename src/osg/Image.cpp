@@ -425,6 +425,8 @@ GLenum Image::computeFormatDataType(GLenum pixelFormat)
 {
     switch (pixelFormat)
     {
+        case GL_R32F:
+        case GL_RG32F:
         case GL_LUMINANCE32F_ARB:
         case GL_LUMINANCE16F_ARB:
         case GL_LUMINANCE_ALPHA32F_ARB:
@@ -466,6 +468,8 @@ GLenum Image::computeFormatDataType(GLenum pixelFormat)
 
         case GL_RGBA:
         case GL_RGB:
+        case GL_RED:
+        case GL_RG:
         case GL_LUMINANCE:
         case GL_LUMINANCE_ALPHA:
         case GL_ALPHA: return GL_UNSIGNED_BYTE;
@@ -525,6 +529,9 @@ unsigned int Image::computeNumComponents(GLenum pixelFormat)
         case(GL_ALPHA32UI_EXT): return 1;
         case(GL_ALPHA16F_ARB): return 1;
         case(GL_ALPHA32F_ARB): return 1;
+        case(GL_R32F): return 1;
+        case(GL_RG): return 2;
+        case(GL_RG32F): return 2;
         case(GL_RGB): return 3;
         case(GL_BGR): return 3;
         case(GL_RGB8I_EXT): return 3;
@@ -1943,13 +1950,13 @@ void _writeColor(GLenum pixelFormat, T* data, float scale, const Vec4& c)
     switch(pixelFormat)
     {
     case(GL_DEPTH_COMPONENT):   //intentionally fall through and execute the code for GL_LUMINANCE
-    case(GL_LUMINANCE):         { (*data++) = c[0] * scale; } break;
-    case(GL_ALPHA):             { (*data++) = c[3] * scale; } break;
-    case(GL_LUMINANCE_ALPHA):   { (*data++) = c[0] * scale;  (*data++) = c[3] * scale; } break;
-    case(GL_RGB):               { (*data++) = c[0] *scale; (*data++) = c[1] *scale; (*data++) = c[2] *scale;} break;
-    case(GL_RGBA):              { (*data++) = c[0] *scale; (*data++) = c[1] *scale; (*data++) = c[2] *scale; (*data++) = c[3] *scale;} break;
-    case(GL_BGR):               { (*data++) = c[2] *scale; (*data++) = c[1] *scale; (*data++) = c[0] *scale;} break;
-    case(GL_BGRA):              { (*data++) = c[2] *scale; (*data++) = c[1] *scale; (*data++) = c[0] *scale; (*data++) = c[3] *scale;} break;
+    case(GL_LUMINANCE):         { (*data++) = (T)(c[0] * scale); } break;
+    case(GL_ALPHA):             { (*data++) = (T)(c[3] * scale); } break;
+    case(GL_LUMINANCE_ALPHA):   { (*data++) = (T)(c[0] * scale);  (*data++) = (T)(c[3] * scale); } break;
+    case(GL_RGB):               { (*data++) = (T)(c[0] *scale); (*data++) = (T)(c[1] *scale); (*data++) = (T)(c[2] *scale);} break;
+    case(GL_RGBA):              { (*data++) = (T)(c[0] *scale); (*data++) = (T)(c[1] *scale); (*data++) = (T)(c[2] *scale); (*data++) = (T)(c[3] *scale);} break;
+    case(GL_BGR):               { (*data++) = (T)(c[2] *scale); (*data++) = (T)(c[1] *scale); (*data++) = (T)(c[0] *scale);} break;
+    case(GL_BGRA):              { (*data++) = (T)(c[2] *scale); (*data++) = (T)(c[1] *scale); (*data++) = (T)(c[0] *scale); (*data++) = (T)(c[3] *scale);} break;
     }
 
 }

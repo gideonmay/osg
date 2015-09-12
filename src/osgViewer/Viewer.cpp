@@ -587,6 +587,7 @@ void Viewer::realize()
     // pass on the start tick to all the associated event queues
     setStartTick(osg::Timer::instance()->getStartTick());
 
+    // configure threading.
     setUpThreading();
 
     if (osg::DisplaySettings::instance()->getCompileContextsHint())
@@ -754,7 +755,7 @@ void Viewer::generateSlavePointerData(osg::Camera* camera, osgGA::GUIEventAdapte
                                         }
                                         else if (tcm)
                                         {
-                                            OSG_NOTICE<<"  Slave has matched texture cubemap"<<ba_itr->second._texture.get()<<", "<<ba_itr->second._face<<std::endl;
+                                            OSG_INFO<<"  Slave has matched texture cubemap"<<ba_itr->second._texture.get()<<", "<<ba_itr->second._face<<std::endl;
                                         }
                                         else
                                         {

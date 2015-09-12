@@ -16,7 +16,8 @@
 
 #include <osg/Config>
 #include <osg/Export>
-
+#include <osg/Types>
+ 
 #cmakedefine OSG_GL1_AVAILABLE
 #cmakedefine OSG_GL2_AVAILABLE
 #cmakedefine OSG_GL3_AVAILABLE
@@ -29,6 +30,8 @@
 #cmakedefine OSG_GL_VERTEX_FUNCS_AVAILABLE
 #cmakedefine OSG_GL_VERTEX_ARRAY_FUNCS_AVAILABLE
 #cmakedefine OSG_GL_FIXED_FUNCTION_AVAILABLE
+#cmakedefine GL_HEADER_HAS_GLINT64
+#cmakedefine GL_HEADER_HAS_GLUINT64
 
 #define OSG_GL1_FEATURES @OSG_GL1_FEATURES@
 #define OSG_GL2_FEATURES @OSG_GL2_FEATURES@
@@ -36,6 +39,7 @@
 #define OSG_GLES1_FEATURES @OSG_GLES1_FEATURES@
 #define OSG_GLES2_FEATURES @OSG_GLES2_FEATURES@
 #define OSG_GLES3_FEATURES @OSG_GLES3_FEATURES@
+
 
 #ifndef WIN32
 
@@ -93,7 +97,7 @@
     #endif
 
     // XXX This is from Win32's <ctype.h>
-    #if !defined(_WCHAR_T_DEFINED) && !(defined(__GNUC__)&&((__GNUC__ == 3)||(__GNUC__ == 4)))
+    #if !defined(_WCHAR_T_DEFINED) && !(defined(__GNUC__)&&(__GNUC__ > 2))
         typedef unsigned short wchar_t;
         #define _WCHAR_T_DEFINED
     #endif
@@ -115,14 +119,12 @@
 #endif // GL_APIENTRY
 
 
-#if !defined(GL_VERSION_3_1)
-    #ifdef _WIN32
-        typedef          __int64 GLint64;
-        typedef unsigned __int64 GLuint64;
-    #else
-        typedef long long int GLint64;
-        typedef unsigned long long int GLuint64;
-    #endif
+#ifndef GL_HEADER_HAS_GLINT64
+    typedef int64_t GLint64;
+#endif
+
+#ifndef GL_HEADER_HAS_GLUINT64
+    typedef uint64_t GLuint64;
 #endif
 
 #ifdef OSG_GL_MATRICES_AVAILABLE
