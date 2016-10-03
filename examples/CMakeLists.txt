@@ -12,6 +12,7 @@ SET(TARGET_COMMON_LIBRARIES
     osgGA
     osgViewer
     osgText
+        osgModeling
 )
 
 IF(ANDROID)
@@ -69,6 +70,11 @@ IF(DYNAMIC_OPENSCENEGRAPH)
     ADD_SUBDIRECTORY(osggpx)
     ADD_SUBDIRECTORY(osggraphicscost)
     ADD_SUBDIRECTORY(osgmanipulator)
+    ADD_SUBDIRECTORY(osgmodelingbasic)
+    ADD_SUBDIRECTORY(osgmodelingboolean)
+    ADD_SUBDIRECTORY(osgmodelingbsptree)
+    ADD_SUBDIRECTORY(osgmodelingnurbs)
+    ADD_SUBDIRECTORY(osgmodelingsubd)
     ADD_SUBDIRECTORY(osgmovie)
     ADD_SUBDIRECTORY(osgmultiplemovies)
     ADD_SUBDIRECTORY(osgmultiplerendertargets)

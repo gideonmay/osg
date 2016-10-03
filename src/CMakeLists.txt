@@ -29,6 +29,7 @@ FOREACH( mylibfolder
         osgWrappers/serializers
         osgWrappers/deprecated-dotosg
         osgPlugins
+        osgModeling
     )
 
     ADD_SUBDIRECTORY(${mylibfolder})
